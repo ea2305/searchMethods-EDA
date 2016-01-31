@@ -1,2 +1,2 @@
-rm *.class ./menu/*.class ./search/*.class ./sort/*.class
+rm *.class ./menu/*.class ./search/*.class ./sorts/*.class
 echo "Clean is success"

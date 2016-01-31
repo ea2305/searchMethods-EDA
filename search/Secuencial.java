@@ -23,13 +23,13 @@ public class Secuencial{
         
         while((i < A.length) && (!Bandera)){
             
-            count++;//Incrementamos contador
-            
-            if(target == A[i]){
+            count++;//Incrementamos contador         
+            if(target.equals(A[i])){
                     Bandera = true;//CAmbiamos la bandera 
             }
             i++;   
         }
+        System.out.println(Bandera);
         if(Bandera){
             return i;//Retornamos 
         }else{
@@ -46,11 +46,11 @@ public class Secuencial{
         int i = 0;
         boolean Bandera = false;
         
-        while((i < A.length) && (!Bandera) && (target >= A[i])){
+        while((i < A.length) && (!Bandera) && (target.compareTo(A[i]) >= 0)){
             
             count++;//Incrementamos contador
-            
-            if(target == A[i]){
+
+            if(target.equals(A[i])){
                     Bandera = true;//Cambiamos la bandera 
             }
             i++;            
@@ -72,7 +72,7 @@ public class Secuencial{
         for(int i = 0; i < A.length; i++){
                 count++;//incrementamos contador
                 //Si el elemento de la posicion es el buscado
-                if(Target == A[i])
+                if(Target.equals(A[i]))
                     return i;
         }
         

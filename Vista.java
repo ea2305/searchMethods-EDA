@@ -1,58 +1,132 @@
+/**
+ * Some sentences to handle menu system and calls about methods 
+ *@author Elihu Alejandro Cruz Albores
+ *@author Carlos Maximiliano Ortiz Escobar
+ *@author Luis Angel Farelo Toledo
+ *@author Julio de Buen Hernandez
+ *@author Luis Alcocer
+ *@version 1.2
+ */
+
 import java.util.Scanner;
 import menu.*;
-import sort.*;
+import sorts.*;
 import search.*;
+import util.*;
 
 class Vista{
 
-    public  Integer data_Search [] = {1,2,4,5,1,5,5,1,5,31,5,123,513,5,13,51,3,51,35,1,35,13,5,135}; 
-    public  Integer target = 10;   
-    private  boolean SEARCH_OPTION = false;
+    String [] string_data;
+    Integer data_Search [];
+    Integer data_Sort [];
     
+    Integer target;   
+    private boolean SEARCH_OPTION;
+    private boolean stateSort;
     
+    //default constructor
+    public Vista(){
+        target = 0;   
+        boolean SEARCH_OPTION = false;
+        stateSort = false;
+    }
+    
+    //menu of system search
     public void startSearchMenu(){//Print all content of menu search
         
         String kindSearch [] = {"Ordenar Elementos","Buscar","Imprimir arreglo","Salir =>"};
 
-        Menu searchMenu = new Menu("ORDEN DE ELEMENTOS", kindSearch);//Callback
+        Menu searchMenu = new Menu("BUSQUEDA ELEMENTOS", kindSearch);//Callback
         menuReader(searchMenu,false);
     }
-    
-    public  void secuentialSearch(){//Setting 
+
+    //Callback to secuential search    
+    public  void secuentialSearch(){//Setting
+     
+        if(string_data == null){//Return if the file doesn't be loaded
+            System.out.println("*xxxxxxxxxx[ NO SE HAN CARGADO DATOS :C ]xxxxxxxxxx*");
+            return;
+        }
         SEARCH_OPTION = true;
         startSearchMenu();
     }
     
+    //Callback to binary search
     public  void binarySearch(){
+        
+        if(string_data == null){//Return if the file doesn't be loaded
+            System.out.println("*xxxxxxxxxx[ NO SE HAN CARGADO DATOS :C ]xxxxxxxxxx*");
+            return;
+        }
+        
         SEARCH_OPTION = false;
         startSearchMenu();
     }
-    
+
+    //call methods    
     public  void callSecuential(){
-        int ok = 0;
+        
+        this.target = targetSearch();
+        Integer [] selection_Target = (stateSort) ? data_Sort : data_Search;
 
         Secuencial mySearch = new Secuencial();
-        System.out.println(">>>Busqueda con algoritmo no optimizado");
-        ok = mySearch.simpleSearch(data_Search,target);
-        if(ok >= 0)
-            System.out.println("Dato encontrado en la posicion : " + ok);
-        else
-            System.out.println("Dato no localizado");
+        System.out.println(">>>Busqueda con algoritmo no optimizado"); 
+        printFormatTest(mySearch.simpleSearch(selection_Target,this.target),mySearch.getCount() );
+
         
         //Search with method more complex and reduction of iterations
         System.out.println(">>>Busqueda con algoritmo optimizado");
-        ok = mySearch.complexSearch(data_Search,target);
-        
-        if(ok >= 0)
-            System.out.println("Dato encontrado en la posicion : " + ok);
-        else
-            System.out.println("Dato no localizado");
-        
+        if(isOrdenate(selection_Target)){
+            System.out.println("ARREGLO ORDENADO =>"); 
+            printFormatTest(mySearch.complexSearch(selection_Target,this.target),mySearch.getCount());
+        }else{
+            System.out.println("ARRELGO DESORDENADO =x se necesita que el arreglo este metodo de busqueda");
+        }
     }
     
-    public  void callBinary(){
+    public boolean isOrdenate(Integer A []){
         
-        //none
+        int size = A.length - 1;
+        
+        for(int i = 0 ; i < size; i++){
+            if(A[i] > A[i + 1])
+                return false;
+        }
+        return true;
+    }
+    
+    public void printFormatTest(int ok,int comparaciones){
+        System.out.println("\n\t*************[ RESULTADOS ]****************");
+        System.out.println("\n\tComparaciones : " + comparaciones);
+        if(ok >= 0)
+            System.out.println("\tDato encontrado en la posicion : " + ok + "\n");
+        else
+            System.out.println("\tDato no localizado\n");
+        System.out.println("\n\t*************[ FIN - RESULTADOS ]****************\n");            
+    }
+    
+    public Integer[] copyArray(Integer [] A){
+        Integer [] temp = new Integer[A.length];
+        for(int i = 0; i < A.length ; i++){
+            temp[i] = A[i];
+        }
+        return temp;
+    }
+    
+    public  void callBinary(){//Call binary search method
+
+        this.target = targetSearch();
+        Integer [] selection_Target = (stateSort) ? data_Sort : data_Search;
+        
+        Binary myBinary = new Binary();
+
+        if(isOrdenate(selection_Target)){
+            System.out.println(">>>Busqueda con algoritmo no optimizado"); 
+            //Incresed count 'cause select the position in array.
+            
+            printFormatTest(myBinary.simpleSearch(selection_Target,this.target) + 1,myBinary.getCount() );            
+        }else
+            System.out.println("ARRELGO DESORDENADO =x se necesita que el arreglo este metodo de busqueda");
         
     }
     
@@ -60,10 +134,16 @@ class Vista{
      protected  int switcherMenu(int option){
 
         switch(option){
-            case 1:
-                secuentialSearch();
+            case 1: 
+                //load file external directory
+                AnalizaFile myReader = new AnalizaFile();
+                string_data = myReader.loadFile();
+                data_Search = myReader.parseInformation(string_data);//Transform string to integer
                 return option;
             case 2:
+                secuentialSearch();
+                return option;
+            case 3:
                 binarySearch();
                 return option;
             default:
@@ -75,29 +155,34 @@ class Vista{
 
         switch(option){
             case 1:      
-                if(data_Search.length > 10000){
+                if(data_Search.length > 10000){//Select optimal option
                     
                     MergeSort myMerge = new MergeSort();
-                    myMerge.mergeSort(data_Search);
+                    this.data_Sort = copyArray(data_Search);//Move data to sorter array. save information
+                    myMerge.mergeSort(data_Sort);
+                    stateSort = true;
                     
-                }else{
+                }else{//Select optimal option
                     
                     Seleccion mySelection = new Seleccion();
-                    mySelection.seleccion(data_Search);
+                    this.data_Sort = copyArray(data_Search);
+                    mySelection.seleccion(data_Sort);//Send array with copied information
+                    stateSort = true;
                 }
                     
                 return option;
                 
             case 2:
-                if(SEARCH_OPTION){
+                if(SEARCH_OPTION)
                     callSecuential();
-                }else{
-                    callBinary();    
-                }
+                else
+                    callBinary();
+                        
                 return option;
                 
             case 3:
-                printArray(data_Search);
+                Integer [] selection_Target = (stateSort) ? data_Sort : data_Search; 
+                printArray(selection_Target);
                 return option;
                     
             default:
@@ -131,15 +216,29 @@ class Vista{
      
     //Print content of array has gotten
     public  void printArray(Integer A[]){
+        int index = 1;
         for(Integer e : A)
-            System.out.println("[ " + e + " ]");
+            System.out.println( (index++) + " : [ " + e + " ]");
+    }
+    
+    public Integer targetSearch(){
+        Integer A = -1;//Error posibility
+        
+        Scanner myReader =new Scanner(System.in);
+        try{
+            System.out.println("Ingrese un numero: ");
+            A = myReader.nextInt();
+        }catch(Exception e){
+            A = targetSearch();
+        }
+        return A;
     }
     
     //Call all system, with menu and reader function
     public void start(){
                 
         //Contents
-        String [] items = {"Busqueda secuencial o lineal","Busqueda Binaria","Salir =>"};
+        String [] items = {"Cargar Archivo externo","Busqueda secuencial o lineal","Busqueda Binaria","Salir =>"};
         
         //Initialize object
         Menu myMenu = new Menu("METODOS DE BUSQUEDA",items);
